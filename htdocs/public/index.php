@@ -26,16 +26,15 @@ $pathInfo = $request->getPathInfo();     //getPathInfo() récupère tout ce qu'i
 
 //Puisque le UrlMatcher->macth genere une exception si aucune route match, on utilise un try catch
 try {
-    $resultat = $urlMatcher->match($pathInfo);  //Retourne un tableau avec la route et les parametres
+    //Retourne un tableau avec la route et les parametres
+    $resultat = $urlMatcher->match($pathInfo);
 
-    //extract($request->query->all());    //$request->query représente les parametres de l'url.   //Extract genère les variables à partir d'un tableau associatif. De cette manière là la variable $name est automatiquement générer depuis le tableau associatif $_GET. Donc plus besoin de la récupérer dans le fichier hello.php
+    //Stocker dans request à envoyer à notre function d'url le resultat retourné par urlMatcher
+    $request->attributes->add($resultat);
 
-    //Extraire $resultat qui correspond au tableau avec les donnees de la route dont les parametres
-    extract ($resultat);
+    //Appeler la fonction lié à la route stocker dans la variable callable dans parametre de resultat
+    $response = call_user_func($resultat['_controller'], $request);
 
-    ob_start();     //Création de tampon pour inclure le fichier dedans car on souhaite envoyer la reponse uniquement via $response->send() et pas utiliser include qui affiche lui même le resultat
-    include __DIR__ . '/../src/pages/' . $_route . '.php';       //Include se stock dans le tampon
-    $response = new Response(ob_get_clean());
 }catch(ResourceNotFoundException $e){
     $response = new Response("La page demandé n'existe pas", 404);
 }catch(Exception $e){
