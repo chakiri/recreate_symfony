@@ -7,10 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class GreetingController{
 
-    public function hello(Request $request){
-        //Get data from request attributes
-        $_route = $request->attributes->get('_route');
-        $name = $request->attributes->get('name');
+    public function hello(Request $request, $name, $_route){
 
         //integrer html
         ob_start();

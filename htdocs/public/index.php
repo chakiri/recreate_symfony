@@ -2,6 +2,8 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Controller\ArgumentResolver;
+use Symfony\Component\HttpKernel\Controller\ControllerResolver;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
@@ -24,16 +26,25 @@ $urlMatcher = new UrlMatcher($routes, $context);        //Class qui verifie si u
 //Récupérer adresse
 $pathInfo = $request->getPathInfo();     //getPathInfo() récupère tout ce qu'il ya derrière index.php    ex: /hello
 
+//Instancier le controller resolver
+$controllerResolver = new ControllerResolver();
+
+//Instancier le ArgumentController
+$argumentResolver = new ArgumentResolver();
+
 //Puisque le UrlMatcher->macth genere une exception si aucune route match, on utilise un try catch
 try {
-    //Retourne un tableau avec la route et les parametres
-    $resultat = $urlMatcher->match($pathInfo);
-
     //Stocker dans request à envoyer à notre function d'url le resultat retourné par urlMatcher
-    $request->attributes->add($resultat);
+    $request->attributes->add($urlMatcher->match($pathInfo));
 
-    //Appeler la fonction lié à la route stocker dans la variable callable dans parametre de resultat
-    $response = call_user_func($resultat['_controller'], $request);
+    //Récupérer la callable à l'aide du controller resolver
+    $controller = $controllerResolver->getController($request);
+
+    //Detecter de quels parametres à besoin notre methode callback
+    $arguments = $argumentResolver->getArguments($request, $controller);
+
+    //Executer la fonction lié à la route stocker dans la variable callable dans parametre de resultat
+    $response = call_user_func_array($controller, $arguments);
 
 }catch(ResourceNotFoundException $e){
     $response = new Response("La page demandé n'existe pas", 404);

@@ -9,13 +9,13 @@ $routes = new RouteCollection();
 //Ajouter nos route
 $routes->add('hello', new Route('/hello/{name}', [
     'name' => 'world',
-    '_controller' => [new GreetingController(), 'hello']
+    '_controller' => 'App\Controller\GreetingController::hello'
 ]));
 $routes->add('bye', new Route('/bye', [
-    '_controller' => [new GreetingController(), 'bye']
+    '_controller' => 'App\Controller\GreetingController::bye'
 ]));
 $routes->add('about', new Route('/about', [
-    '_controller' => [new GreetingController(), 'about']
+    '_controller' => 'App\Controller\GreetingController::about'
 ]));
 
 return $routes;
